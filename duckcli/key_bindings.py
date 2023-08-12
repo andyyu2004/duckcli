@@ -1,7 +1,8 @@
 import logging
 from prompt_toolkit.enums import EditingMode
-from prompt_toolkit.filters import completion_is_selected
-from prompt_toolkit.key_binding import KeyBindings
+from prompt_toolkit.filters import completion_is_selected, ViInsertMode
+from prompt_toolkit.keys import Keys
+from prompt_toolkit.key_binding import KeyBindings, KeyPress
 
 _logger = logging.getLogger(__name__)
 
@@ -79,5 +80,13 @@ def cli_bindings(cli):
         event.current_buffer.complete_state = None
         b = event.app.current_buffer
         b.complete_state = None
+
+    @kb.add("f", "d", filter=ViInsertMode())
+    def _(event):
+        """
+        Typing 'fd' in Insert mode, should go back to navigation mode.
+        """
+        _logger.debug("Detected fd keys.")
+        event.cli.key_processor.feed(KeyPress(Keys.Escape))
 
     return kb
